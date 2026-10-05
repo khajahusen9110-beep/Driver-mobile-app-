@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">Rider Driver</string>
+    <string name="app_name">GoRide Driver</string>
+    <string name="channel_rides">Ride requests</string>
+    <string name="channel_rides_desc">New ride requests and trip updates</string>
+    <string name="channel_general">Account and payments</string>
+    <string name="channel_online">Online status</string>
+    <string name="channel_online_desc">Shown while you are online and sharing your location</string>
+    <string name="online_notification_title">You\'re online</string>
+    <string name="online_notification_text">Sharing your location to receive nearby rides</string>
 </resources>

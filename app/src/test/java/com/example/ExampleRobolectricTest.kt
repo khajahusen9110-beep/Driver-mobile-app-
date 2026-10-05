@@ -13,9 +13,8 @@ import org.robolectric.annotation.Config
 class ExampleRobolectricTest {
 
   @Test
-  fun `read string from context`() {
+  fun `app name is GoRide Driver`() {
     val context = ApplicationProvider.getApplicationContext<Context>()
-    val appName = context.getString(R.string.app_name)
-    assertEquals("Rider Driver", appName)
+    assertEquals("GoRide Driver", context.getString(R.string.app_name))
   }
 }

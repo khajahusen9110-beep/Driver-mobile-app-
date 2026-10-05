@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Star
@@ -57,7 +58,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.platform.LocalContext
+import com.example.push.RideAlert
 import com.example.data.Ride
 import com.example.data.ReturnTripOffer
 import com.example.ui.DriverViewModel
@@ -100,6 +104,12 @@ fun DashboardScreen(viewModel: DriverViewModel) {
         if (result.values.any { it }) viewModel.goOnline()
     }
     val online = state.status?.isOnline == true
+    val context = LocalContext.current
+    var fullScreenAllowed by remember { mutableStateOf(RideAlert.canUseFullScreen(context)) }
+    LifecycleResumeEffect(Unit) {
+        fullScreenAllowed = RideAlert.canUseFullScreen(context)
+        onPauseOrDispose { }
+    }
 
     Scaffold(
         topBar = {
@@ -152,6 +162,21 @@ fun DashboardScreen(viewModel: DriverViewModel) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         StatTile("Today's earnings", Format.money(state.today?.net ?: 0.0), Modifier.weight(1f))
                         StatTile("Trips today", "${state.today?.rides ?: 0}", Modifier.weight(1f))
+                    }
+                }
+                if (online && !fullScreenAllowed) {
+                    item {
+                        SectionCard(onClick = { context.startActivity(RideAlert.fullScreenSettingsIntent(context)) }) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.NotificationsActive, contentDescription = null, tint = DriverWarningAmber)
+                                Spacer(Modifier.width(12.dp))
+                                Column(Modifier.weight(1f)) {
+                                    Text("Turn on full-screen order alerts", fontWeight = FontWeight.SemiBold)
+                                    Text("So new orders show on your lock screen. Tap to allow.", color = TextSecondaryDark,
+                                        style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                        }
                     }
                 }
                 if (online) {

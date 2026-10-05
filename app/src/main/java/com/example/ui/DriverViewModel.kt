@@ -34,6 +34,8 @@ import com.example.data.Withdrawal
 import com.example.location.LocationProvider
 import com.example.location.OnlineLocationService
 import com.example.push.PushMessagingService
+import com.example.push.RideAlert
+import com.example.ui.components.Format
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -46,6 +48,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.Duration
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Locale
@@ -162,6 +166,19 @@ class DriverViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _selectedVehicleId = MutableStateFlow(repo.selectedVehicleId)
     val selectedVehicleId: StateFlow<String?> = _selectedVehicleId.asStateFlow()
+
+    private val _rideAlertSound = MutableStateFlow(app.session.rideAlertSound)
+    val rideAlertSound: StateFlow<Boolean> = _rideAlertSound.asStateFlow()
+
+    fun setRideAlertSound(enabled: Boolean) {
+        app.session.rideAlertSound = enabled
+        _rideAlertSound.value = enabled
+    }
+
+    /** Called when the app comes to the front, e.g. after accepting from the full-screen alert. */
+    fun onAppResumed() {
+        if (_profile.value?.onboardingStatus == OnboardingStatus.APPROVED) launchQuiet { onRidesChanged() }
+    }
 
     val serviceRunning = OnlineLocationService.running
     val lastLocation = LocationProvider.lastLocation
@@ -499,6 +516,7 @@ class DriverViewModel(application: Application) : AndroidViewModel(application) 
 
     private suspend fun goOfflineQuietly(throwErrors: Boolean = false) {
         OnlineLocationService.stop(app)
+        _dashboard.value.requests.forEach { RideAlert.cancel(app, it.id) }
         val location = LocationProvider.lastLocation.value
         try {
             val status = repo.updateStatus(false, location?.latitude, location?.longitude, repo.selectedVehicleId)
@@ -553,10 +571,27 @@ class DriverViewModel(application: Application) : AndroidViewModel(application) 
 
     private suspend fun refreshRequests() {
         val requests = runCatching { repo.openRequests() }.getOrNull() ?: return
+        val previous = _dashboard.value.requests.map { it.id }.toSet()
         _dashboard.update { it.copy(requests = requests) }
+        val currentIds = requests.map { it.id }.toSet()
+        // Requests that went away (taken by another driver, cancelled) stop ringing.
+        previous.filterNot { it in currentIds }.forEach { RideAlert.cancel(app, it) }
+        requests.filter { it.id !in previous && isFresh(it) }.forEach { ride ->
+            RideAlert.show(
+                app, ride.id,
+                "New order · ${Format.money(ride.fare)}",
+                listOfNotNull(ride.pickupAddress, ride.dropAddress).joinToString(" → ").ifBlank { "Tap to view" },
+            )
+        }
+    }
+
+    private fun isFresh(ride: Ride): Boolean {
+        val at = ride.requestedAt ?: return true
+        return ride.isScheduled || Duration.between(at, Instant.now()).toMinutes() < 10
     }
 
     fun acceptRide(ride: Ride) = action("Accepting") {
+        RideAlert.cancel(app, ride.id)
         try {
             val accepted = repo.acceptRide(ride.id)
             openTrip(accepted)
@@ -567,6 +602,7 @@ class DriverViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun skipRide(ride: Ride) {
+        RideAlert.cancel(app, ride.id)
         _dashboard.update { s -> s.copy(requests = s.requests.filterNot { it.id == ride.id }) }
         launchQuiet { repo.rejectRide(ride.id, "Skipped by driver") }
     }

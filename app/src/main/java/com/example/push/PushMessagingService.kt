@@ -41,7 +41,12 @@ class PushMessagingService : FirebaseMessagingService() {
         val title = message.notification?.title ?: message.data["title"] ?: getString(R.string.app_name)
         val body = message.notification?.body ?: message.data["body"].orEmpty()
         val type = message.data["type"].orEmpty()
-        showNotification(this, title, body, type)
+        val rideId = message.data["ride_id"]
+        if (type == "new_ride_request" && rideId != null) {
+            RideAlert.show(this, rideId, title, body)
+        } else {
+            showNotification(this, title, body, type)
+        }
     }
 
     companion object {

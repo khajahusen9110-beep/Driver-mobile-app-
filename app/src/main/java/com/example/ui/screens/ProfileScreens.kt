@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.ReportProblem
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
@@ -37,6 +38,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -78,6 +80,7 @@ fun ProfileScreen(viewModel: DriverViewModel) {
     val profile by viewModel.profile.collectAsStateWithLifecycle()
     val earnings by viewModel.earnings.collectAsStateWithLifecycle()
     val busy by viewModel.busy.collectAsStateWithLifecycle()
+    val alertSound by viewModel.rideAlertSound.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var editName by remember { mutableStateOf(false) }
     var confirmLogout by remember { mutableStateOf(false) }
@@ -142,6 +145,20 @@ fun ProfileScreen(viewModel: DriverViewModel) {
                     MenuRow(Icons.Default.EmojiEvents, "Incentives") { viewModel.navigate(Screen.Incentives) }
                     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
                     MenuRow(Icons.Default.ReportProblem, "Help & complaints") { viewModel.navigate(Screen.Complaints) }
+                }
+            }
+            item {
+                SectionCard {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.NotificationsActive, contentDescription = null)
+                        Spacer(Modifier.width(16.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text("Ringtone for new orders")
+                            Text(if (alertSound) "Rings and vibrates for up to 1 minute" else "Vibrates only",
+                                color = TextSecondaryDark, style = MaterialTheme.typography.bodySmall)
+                        }
+                        Switch(checked = alertSound, onCheckedChange = viewModel::setRideAlertSound)
+                    }
                 }
             }
             item {

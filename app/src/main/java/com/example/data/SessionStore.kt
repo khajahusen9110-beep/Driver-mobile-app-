@@ -30,6 +30,11 @@ class SessionStore(context: Context) {
         get() = prefs.getString(KEY_VEHICLE, null)
         set(value) = prefs.edit { putString(KEY_VEHICLE, value) }
 
+    /** Whether new-order alerts ring (true) or only vibrate (false). */
+    var rideAlertSound: Boolean
+        get() = prefs.getBoolean(KEY_ALERT_SOUND, true)
+        set(value) = prefs.edit { putBoolean(KEY_ALERT_SOUND, value) }
+
     val deviceId: String
         get() = prefs.getString(KEY_DEVICE_ID, null) ?: ("android-" + UUID.randomUUID().toString()).also {
             prefs.edit { putString(KEY_DEVICE_ID, it) }
@@ -48,9 +53,11 @@ class SessionStore(context: Context) {
     /** Clears the login but keeps the install-level device id. */
     fun clear() {
         val device = deviceId
+        val sound = rideAlertSound
         prefs.edit {
             clear()
             putString(KEY_DEVICE_ID, device)
+            putBoolean(KEY_ALERT_SOUND, sound)
         }
     }
 
@@ -63,5 +70,6 @@ class SessionStore(context: Context) {
         const val KEY_PUSH_TOKEN = "push_token"
         const val KEY_VEHICLE = "selected_vehicle_id"
         const val KEY_DEVICE_ID = "device_id"
+        const val KEY_ALERT_SOUND = "ride_alert_sound"
     }
 }

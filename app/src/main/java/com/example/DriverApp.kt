@@ -8,6 +8,7 @@ import com.example.data.DriverRepository
 import com.example.data.RealtimeClient
 import com.example.data.SessionStore
 import com.example.data.SupabaseClient
+import com.example.push.RideAlert
 
 /** Builds the shared app objects once, for the activity, the location service and the push service. */
 class DriverApp : Application() {
@@ -26,6 +27,7 @@ class DriverApp : Application() {
         repository = DriverRepository(client, session)
         realtime = RealtimeClient(client.http) { client.validAccessToken() }
         createNotificationChannels()
+        RideAlert.createChannels(this)
     }
 
     private fun createNotificationChannels() {

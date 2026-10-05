@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "988308340089",
+    "project_id": "taxiandsalon",
+    "storage_bucket": "taxiandsalon.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:988308340089:android:b018f57087efa9983283a8",
+        "android_client_info": {
+          "package_name": "com.aistudio.riderdriver.kxpqla"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbmiD7CKjzVoRMCbM_ENOMrYsWjt7orNQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

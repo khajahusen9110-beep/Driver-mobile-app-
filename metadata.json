@@ -1,0 +1,6 @@
+{
+  "name": "Rider Driver",
+  "description": "Professional driver partner mobile app for trip requests, real-time navigation, earnings, wallet withdrawals, document compliance, and fleet vehicle management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

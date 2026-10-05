@@ -85,6 +85,7 @@ dependencies {
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.coroutines.play.services)
   implementation(libs.okhttp)
+  implementation(libs.logging.interceptor)
   implementation(libs.play.services.location)
   testImplementation(libs.junit)
   testImplementation(libs.json)

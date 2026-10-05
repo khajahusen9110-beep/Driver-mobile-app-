@@ -87,7 +87,9 @@ class SupabaseClient(private val session: SessionStore) {
     private suspend fun refresh(staleToken: String?): String = refreshMutex.withLock {
         // Another caller may have refreshed while this one waited.
         val current = session.accessToken
-        if (current != null && current != staleToken && session.expiresAt - nowSeconds() > 60) return current
+        if (current != null && current != staleToken && session.expiresAt - nowSeconds() > 60) {
+            return@withLock current
+        }
 
         val refreshToken = session.refreshToken ?: run { expire(); throw SessionExpiredException() }
         val request = post("$AUTH/token?grant_type=refresh_token", JSONObject().put("refresh_token", refreshToken))
